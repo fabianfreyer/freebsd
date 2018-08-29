@@ -33,6 +33,7 @@ SRCS=	\
 	ioapic.c		\
 	mem.c			\
 	mevent.c		\
+	monitor.c		\
 	mptbl.c			\
 	pci_ahci.c		\
 	pci_e82545.c		\

@@ -75,6 +75,7 @@ __FBSDID("$FreeBSD$");
 #include "ioapic.h"
 #include "mem.h"
 #include "mevent.h"
+#include "monitor.h"
 #include "mptbl.h"
 #include "pci_emul.h"
 #include "pci_irq.h"
@@ -144,7 +145,7 @@ usage(int code)
 		"Usage: %s [-abehuwxACHPSWY]\n"
 		"       %*s [-c [[cpus=]numcpus][,sockets=n][,cores=n][,threads=n]]\n"
 		"       %*s [-g <gdb port>] [-l <lpc>]\n"
-		"       %*s [-m mem] [-p vcpu:hostcpu] [-s <pci>] [-U uuid] <vm>\n"
+		"       %*s [-m mem] [-p vcpu:hostcpu] [-s <pci>] [-M socket] [-U uuid] <vm>\n"
 		"       -a: local apic is in xAPIC mode (deprecated)\n"
 		"       -A: create ACPI tables\n"
 		"       -c: number of cpus and/or topology specification\n"
@@ -155,6 +156,7 @@ usage(int code)
 		"       -H: vmexit from the guest on hlt\n"
 		"       -l: LPC device configuration\n"
 		"       -m: memory size in MB\n"
+		"       -M: monitor socket\n"
 		"       -p: pin 'vcpu' to 'hostcpu'\n"
 		"       -P: vmexit from the guest on pause\n"
 		"       -s: <slot,driver,configinfo> PCI slot config\n"
@@ -922,7 +924,7 @@ main(int argc, char *argv[])
 	rtc_localtime = 1;
 	memflags = 0;
 
-	optstr = "abehuwxACHIPSWYp:g:G:c:s:m:l:U:";
+	optstr = "abehuwxACHIPSWYp:g:G:c:s:m:l:M:U:";
 	while ((c = getopt(argc, argv, optstr)) != -1) {
 		switch (c) {
 		case 'a':
@@ -983,6 +985,12 @@ main(int argc, char *argv[])
 			error = vm_parse_memsize(optarg, &memsize);
 			if (error)
 				errx(EX_USAGE, "invalid memsize '%s'", optarg);
+			break;
+		case 'M':
+			if (monitor_parse(optarg) != 0) {
+				errx(EX_USAGE, "invalid monitor socket '%s'",
+				    optarg);
+			}
 			break;
 		case 'H':
 			guest_vmexit_on_hlt = 1;
